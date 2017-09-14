@@ -106,6 +106,9 @@ void helper_cpuid(CPUX86State *env)
 
     cpu_x86_cpuid(env, (uint32_t)env->regs[R_EAX], (uint32_t)env->regs[R_ECX],
                   &eax, &ebx, &ecx, &edx);
+    // reset hypervisor bit
+    if ((uint32_t)env->regs[R_EAX] == 0x1 && (uint32_t)env->regs[R_ECX] == 0x0)
+	ecx &= 0x7fffffff;
     env->regs[R_EAX] = eax;
     env->regs[R_EBX] = ebx;
     env->regs[R_ECX] = ecx;
