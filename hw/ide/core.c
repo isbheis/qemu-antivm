@@ -39,6 +39,7 @@
 
 // header for antivm
 #include "include/antivm/cdrom-info.h"
+#include "include/antivm/hdinfo.h"
 
 /* These values were based on a Seagate ST3500418AS but have been modified
    to make more sense in QEMU */
@@ -2461,7 +2462,8 @@ int ide_init_drive(IDEState *s, BlockBackend *blk, IDEDriveKind kind,
             strcpy(s->drive_model_str, "QEMU MICRODRIVE");
             break;
         default:
-            strcpy(s->drive_model_str, "QEMU HARDDISK");
+	    // change default mode str for harddisk
+            strcpy(s->drive_model_str, HARDDISK_MODEL_STR);
             break;
         }
     }

@@ -46,6 +46,7 @@ do { printf("scsi-disk: " fmt , ## __VA_ARGS__); } while (0)
 
 //header for antivm
 #include "include/antivm/cdrom-info.h"
+#include "include/antivm/hdinfo.h"
 
 #define SCSI_WRITE_SAME_MAX         524288
 #define SCSI_DMA_BUF_SIZE           131072
@@ -2345,10 +2346,12 @@ static void scsi_realize(SCSIDevice *dev, Error **errp)
     }
 
     if (!s->version) {
-        s->version = g_strdup(qemu_hw_version());
+	// change default version
+        s->version = g_strdup(HARDDISK_VERSION);
     }
     if (!s->vendor) {
-        s->vendor = g_strdup("QEMU");
+	//change default vendor str
+        s->vendor = g_strdup(HARDDISK_VENDOR);
     }
 
     if (blk_is_sg(s->qdev.conf.blk)) {
@@ -2379,7 +2382,8 @@ static void scsi_hd_realize(SCSIDevice *dev, Error **errp)
     s->qdev.blocksize = s->qdev.conf.logical_block_size;
     s->qdev.type = TYPE_DISK;
     if (!s->product) {
-        s->product = g_strdup("QEMU HARDDISK");
+	// change default hd product str
+        s->product = g_strdup(HARDDISK_PRODUCT_STR);
     }
     scsi_realize(&s->qdev, errp);
 }

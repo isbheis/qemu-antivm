@@ -9,8 +9,8 @@
 // cdrom version, max length is 8
 #define CDROM_VERSION "MA01"
 
-// cdrom model str, max length is 16 in hw/ide/atapi.c
+// cdrom model str, for ide driver, max length is 16(in hw/ide/atapi.c)
 #define CDROM_MODEL_STR "DELL DVD-ROM"
 
-// cdrom product str, for scsi device
+// cdrom product str, for scsi driver
 #define CDROM_PRODUCT_STR "DELL CD-ROM"
