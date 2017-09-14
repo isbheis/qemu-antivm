@@ -18,6 +18,9 @@
 #include "hw/mem/nvdimm.h"
 #include "hw/acpi/acpi_dev_interface.h"
 
+// header file for antivm
+#include "include/antivm/cpuinfo.h"
+
 #define HPET_INTCAP "hpet-intcap"
 
 /**
@@ -466,21 +469,22 @@ bool e820_get_entry(int, uint32_t, uint64_t *, uint64_t *);
 /* Helper for setting model-id for CPU models that changed model-id
  * depending on QEMU versions up to QEMU 2.4.
  */
+// change default cpu brandname for qemu32/qemu64, remove version info 
 #define PC_CPU_MODEL_IDS(v) \
     {\
         .driver   = "qemu32-" TYPE_X86_CPU,\
         .property = "model-id",\
-        .value    = "QEMU Virtual CPU version " v,\
+        .value    = DEFAULT_CPU_BRAND_NAME,\
     },\
     {\
         .driver   = "qemu64-" TYPE_X86_CPU,\
         .property = "model-id",\
-        .value    = "QEMU Virtual CPU version " v,\
+        .value    = DEFAULT_CPU_BRAND_NAME,\
     },\
     {\
         .driver   = "athlon-" TYPE_X86_CPU,\
         .property = "model-id",\
-        .value    = "QEMU Virtual CPU version " v,\
+        .value    = ATHLON_CPU_BRAND_NAME,\
     },
 
 #define PC_COMPAT_2_4 \
