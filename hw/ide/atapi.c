@@ -28,6 +28,9 @@
 #include "hw/scsi/scsi.h"
 #include "sysemu/block-backend.h"
 
+// header for antivm
+#include "include/antivm/cdrom-info.h"
+
 #define ATAPI_SECTOR_BITS (2 + BDRV_SECTOR_BITS)
 #define ATAPI_SECTOR_SIZE (1 << ATAPI_SECTOR_BITS)
 
@@ -835,8 +838,8 @@ static void cmd_inquiry(IDEState *s, uint8_t *buf)
         buf[5] = 0;    /* reserved */
         buf[6] = 0;    /* reserved */
         buf[7] = 0;    /* reserved */
-        padstr8(buf + 8, 8, "QEMU");
-        padstr8(buf + 16, 16, "QEMU DVD-ROM");
+        padstr8(buf + 8, 8, CDROM_VENDOR);
+        padstr8(buf + 16, 16, CDROM_MODEL_STR);
         padstr8(buf + 32, 4, s->version);
         idx = 36;
     }

@@ -44,6 +44,9 @@ do { printf("scsi-disk: " fmt , ## __VA_ARGS__); } while (0)
 #include <scsi/sg.h>
 #endif
 
+//header for antivm
+#include "include/antivm/cdrom-info.h"
+
 #define SCSI_WRITE_SAME_MAX         524288
 #define SCSI_DMA_BUF_SIZE           131072
 #define SCSI_MAX_INQUIRY_LEN        256
@@ -2398,7 +2401,7 @@ static void scsi_cd_realize(SCSIDevice *dev, Error **errp)
     s->qdev.type = TYPE_ROM;
     s->features |= 1 << SCSI_DISK_F_REMOVABLE;
     if (!s->product) {
-        s->product = g_strdup("QEMU CD-ROM");
+        s->product = g_strdup(CDROM_PRODUCT_STR);
     }
     scsi_realize(&s->qdev, errp);
 }

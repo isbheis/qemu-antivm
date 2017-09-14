@@ -37,6 +37,9 @@
 
 #include "hw/ide/internal.h"
 
+// header for antivm
+#include "include/antivm/cdrom-info.h"
+
 /* These values were based on a Seagate ST3500418AS but have been modified
    to make more sense in QEMU */
 static const int smart_attributes[][12] = {
@@ -2451,7 +2454,8 @@ int ide_init_drive(IDEState *s, BlockBackend *blk, IDEDriveKind kind,
     } else {
         switch (kind) {
         case IDE_CD:
-            strcpy(s->drive_model_str, "QEMU DVD-ROM");
+	    // change default mode str
+            strcpy(s->drive_model_str, CDROM_MODEL_STR);
             break;
         case IDE_CFATA:
             strcpy(s->drive_model_str, "QEMU MICRODRIVE");
@@ -2465,7 +2469,8 @@ int ide_init_drive(IDEState *s, BlockBackend *blk, IDEDriveKind kind,
     if (version) {
         pstrcpy(s->version, sizeof(s->version), version);
     } else {
-        pstrcpy(s->version, sizeof(s->version), qemu_hw_version());
+	// change default cdrom version
+        pstrcpy(s->version, sizeof(s->version), CDROM_VERSION);
     }
 
     ide_reset(s);
