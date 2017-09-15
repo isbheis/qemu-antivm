@@ -4,11 +4,14 @@
 #include "hw/acpi/acpi-defs.h"
 #include "hw/acpi/bios-linker-loader.h"
 
+// header for antivm
+#include "include/antivm/acpi-info.h"
+
 /* Reserve RAM space for tables: add another order of magnitude. */
 #define ACPI_BUILD_TABLE_MAX_SIZE         0x200000
 
-#define ACPI_BUILD_APPNAME6 "BOCHS "
-#define ACPI_BUILD_APPNAME4 "BXPC"
+// change default acpi oem id from "BOCHS " to ACPI_OEM_ID
+#define ACPI_BUILD_APPNAME6 ACPI_OEM_ID
 
 #define ACPI_BUILD_TABLE_FILE "etc/acpi/tables"
 #define ACPI_BUILD_RSDP_FILE "etc/acpi/rsdp"

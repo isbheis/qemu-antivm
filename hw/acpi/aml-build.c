@@ -1524,12 +1524,14 @@ build_header(BIOSLinker *linker, GArray *table_data,
     if (oem_table_id) {
         strncpy((char *)h->oem_table_id, oem_table_id, sizeof(h->oem_table_id));
     } else {
-        memcpy(h->oem_table_id, ACPI_BUILD_APPNAME4, 4);
-        memcpy(h->oem_table_id + 4, sig, 4);
+	// change default acpi oem table id from "BXPC" + table_sig to ACPI_OEM_TABLE_ID
+        memcpy(h->oem_table_id, ACPI_OEM_TABLE_ID, 8);
     }
 
-    h->oem_revision = cpu_to_le32(1);
-    memcpy(h->asl_compiler_id, ACPI_BUILD_APPNAME4, 4);
+    // change default oem revision
+    h->oem_revision = cpu_to_le32(ACPI_OEM_REVISION);
+    // change default acpi asl compiler id
+    memcpy(h->asl_compiler_id, ACPI_ASL_COMPILER_ID, 4);
     h->asl_compiler_revision = cpu_to_le32(1);
     /* Checksum to be filled in by Guest linker */
     bios_linker_loader_add_checksum(linker, ACPI_BUILD_TABLE_FILE,
