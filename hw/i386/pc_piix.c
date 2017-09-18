@@ -57,6 +57,9 @@
 #include "kvm_i386.h"
 #include "sysemu/numa.h"
 
+// header for antivm
+#include "include/antivm/systeminfo.h"
+
 #define MAX_IDE_BUS 2
 
 static const int ide_iobase[MAX_IDE_BUS] = { 0x1f0, 0x170 };
@@ -168,7 +171,8 @@ static void pc_init1(MachineState *machine,
     if (pcmc->smbios_defaults) {
         MachineClass *mc = MACHINE_GET_CLASS(machine);
         /* These values are guest ABI, do not change */
-        smbios_set_defaults("QEMU", "Standard PC (i440FX + PIIX, 1996)",
+	// change default smbios type1.manufacturer and type1.product
+        smbios_set_defaults(SMBIOS_TYPE1_MANUFACTURER, SMBIOS_TYPE1_PRODUCT,
                             mc->name, pcmc->smbios_legacy_mode,
                             pcmc->smbios_uuid_encoded,
                             SMBIOS_ENTRY_POINT_21);
