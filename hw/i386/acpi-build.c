@@ -63,6 +63,9 @@
 
 #include "hw/acpi/ipmi.h"
 
+// header for antivm
+#include "include/antivm/acpi-info.h"
+
 /* These are used to size the ACPI tables for -M pc-i440fx-1.7 and
  * -M pc-i440fx-2.0.  Even if the actual amount of AML generated grows
  * a little bit, there should be plenty of free space since the DSDT
@@ -2150,7 +2153,7 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         scope = aml_scope("\\_SB.PCI0");
         dev = aml_device("FWCF");
 
-        aml_append(dev, aml_name_decl("_HID", aml_string("QEMU0002")));
+        aml_append(dev, aml_name_decl("_HID", aml_string(ACPI_FW_CFG_AML_ID)));
 
         /* device present, functioning, decoding, not shown in UI */
         aml_append(dev, aml_name_decl("_STA", aml_int(0xB)));

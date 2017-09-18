@@ -18,3 +18,6 @@
 // [optinal] acpi asl compiler revision, default is 1
 //#define ACPI_ASL_COMPILER_REVISION 1
 
+// add 2017-09-18, acpi fw_cfg device aml id
+#define ACPI_FW_CFG_AML_ID "LEN0101"
+
