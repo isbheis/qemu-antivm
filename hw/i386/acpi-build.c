@@ -2192,7 +2192,11 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         scope = aml_scope("\\_SB.PCI0.ISA");
 
         dev = aml_device("PEVT");
-        aml_append(dev, aml_name_decl("_HID", aml_string("QEMU0001")));
+	/* change default pevt hardware id, this should be consistent
+	 * with smbios pevt hardware id. 'src/fw/ssdt-misc.dsl' in
+	 * seabios 1.10.2
+	 */
+        aml_append(dev, aml_name_decl("_HID", aml_string(ACPI_PVPANIC_ID)));
 
         crs = aml_resource_template();
         aml_append(crs,

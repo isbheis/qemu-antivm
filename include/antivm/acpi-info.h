@@ -19,5 +19,8 @@
 //#define ACPI_ASL_COMPILER_REVISION 1
 
 // add 2017-09-18, acpi fw_cfg device aml id
-#define ACPI_FW_CFG_AML_ID "LEN0101"
+#define ACPI_FW_CFG_AML_ID "LENO0002"
 
+// add 2017-09-18, pvpanic device(PEVT) acpi id,
+// this should be consistent with smbios PEVT aml
+#define ACPI_PVPANIC_ID "LENO0001"
