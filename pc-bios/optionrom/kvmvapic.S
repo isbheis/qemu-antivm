@@ -11,6 +11,9 @@
 
 #include "optionrom.h"
 
+# header for antivm
+#include "../../include/antivm/kvm-info.h"
+
 OPTION_ROM_START
 
 	# clear vapic area: firmware load using rep insb may cause
@@ -52,7 +55,7 @@ vapic_size = 2*4096
 .align 16
 
 vapic_base:
-	.ascii "kvm aPiC"
+	.ascii KVM_APIC_SIGNATURE
 
 	/* relocation data */
 	.long vapic_base	; fixup

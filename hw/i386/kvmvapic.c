@@ -20,6 +20,9 @@
 #include "hw/sysbus.h"
 #include "tcg/tcg.h"
 
+// header for antivm
+#include "include/antivm/kvm-info.h"
+
 #define VAPIC_IO_PORT           0x7e
 
 #define VAPIC_CPU_SHIFT         7
@@ -306,7 +309,8 @@ static int update_rom_mapping(VAPICROMState *s, CPUX86State *env, target_ulong i
         return -1;
     }
     read_guest_rom_state(s);
-    if (memcmp(s->rom_state.signature, "kvm aPiC", 8) != 0) {
+    // change default kvm apic signature
+    if (memcmp(s->rom_state.signature, KVM_APIC_SIGNATURE, 8) != 0) {
         return -1;
     }
     s->rom_state_vaddr = rom_state_vaddr;
