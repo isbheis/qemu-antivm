@@ -10,6 +10,9 @@
 
 #include "hw/pci/pcie.h"
 
+// header for antivm
+#include "antivm/pci-info.h"
+
 /* PCI bus */
 
 #define PCI_DEVFN(slot, func)   ((((slot) & 0x1f) << 3) | ((func) & 0x07))
@@ -52,8 +55,8 @@
 #define PCI_DEVICE_ID_MARVELL_GT6412X    0x4620
 
 /* QEMU/Bochs VGA (0x1234) */
-#define PCI_VENDOR_ID_QEMU               0x1234
-#define PCI_DEVICE_ID_QEMU_VGA           0x1111
+#define PCI_VENDOR_ID_QEMU               _PCI_VENDOR_ID_QEMU
+#define PCI_DEVICE_ID_QEMU_VGA           _PCI_DEVICE_ID_QEMU_VGA
 
 /* VMWare (0x15ad) */
 #define PCI_VENDOR_ID_VMWARE             0x15ad
