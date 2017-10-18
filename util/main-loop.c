@@ -33,6 +33,9 @@
 #include "qemu/main-loop.h"
 #include "block/aio.h"
 
+// for antivm
+#include "antivm/mouse-rmove.h"
+
 #ifndef _WIN32
 
 /* If we have signalfd, we mask out the signals we want to handle and then
@@ -495,6 +498,15 @@ void main_loop_wait(int nonblocking)
 
     if (nonblocking) {
         timeout = 0;
+    }
+
+    /* send mouse move event here, may move too fast */
+    static int pulse = 0x8000;
+    pulse -= 1;
+    if (pulse == 0){
+        mouse_move_random();
+        /* smaller, faster */
+        pulse = 0x100;
     }
 
     /* poll any events */

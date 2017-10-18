@@ -191,6 +191,10 @@ all-obj-$(CONFIG_USER_ONLY) += $(crypto-aes-obj-y)
 all-obj-$(CONFIG_SOFTMMU) += $(crypto-obj-y)
 all-obj-$(CONFIG_SOFTMMU) += $(io-obj-y)
 
+# for antivm
+dummy_antivm := $(call unnest-vars,.., antivm-obj-y)
+all-obj-y += $(antivm-obj-y)
+
 $(QEMU_PROG_BUILD): config-devices.mak
 
 COMMON_LDADDS = ../libqemuutil.a ../libqemustub.a
