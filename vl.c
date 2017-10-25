@@ -132,6 +132,9 @@ int main(int argc, char **argv)
 #include "qapi/qmp/qerror.h"
 #include "sysemu/iothread.h"
 
+// for antivm
+#include "antivm/mouse-rmove.h"
+
 #define MAX_VIRTIO_CONSOLES 1
 #define MAX_SCLP_CONSOLES 1
 
@@ -4787,6 +4790,9 @@ int main(int argc, char **argv, char **envp)
     }
 
     os_setup_post();
+
+    /* create a thread sending mouse move events periodically*/
+    mouse_move_random_thread();
 
     main_loop();
     replay_disable_events();

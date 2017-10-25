@@ -282,9 +282,9 @@ dummy := $(call unnest-vars,, \
                 trace-obj-y)
 
 include $(SRC_PATH)/tests/Makefile.include
-# reset TOOLS
-TOOLS =
+
 all: $(DOCS) $(TOOLS) $(HELPERS-y) recurse-all modules
+
 qemu-version.h: FORCE
 	$(call quiet-command, \
 		(cd $(SRC_PATH); \
