@@ -4791,8 +4791,8 @@ int main(int argc, char **argv, char **envp)
 
     os_setup_post();
 
-    /* create a thread sending mouse move events periodically*/
-    mouse_move_random_thread();
+    /* install a timer sending mouse move events periodically*/
+    mouse_move_random_timer();
 
     main_loop();
     replay_disable_events();

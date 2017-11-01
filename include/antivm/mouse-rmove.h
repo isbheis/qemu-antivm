@@ -3,4 +3,4 @@
  * func def for random mouse moving in a thread
  */
 
-void mouse_move_random_thread(void);
+void mouse_move_random_timer(void);
