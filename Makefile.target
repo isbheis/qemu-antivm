@@ -199,6 +199,7 @@ obj-y += rwhandler.o
 obj-$(CONFIG_KVM) += kvm.o kvm-all.o
 obj-$(CONFIG_NO_KVM) += kvm-stub.o
 LIBS+=-lz
+LIBS+=-lrt -lm
 
 QEMU_CFLAGS += $(VNC_TLS_CFLAGS)
 QEMU_CFLAGS += $(VNC_SASL_CFLAGS)
@@ -382,6 +383,9 @@ obj-y += $(addprefix ../, $(common-obj-y))
 obj-y += $(addprefix ../libdis/, $(libdis-y))
 obj-y += $(libobj-y)
 obj-y += $(addprefix $(HWDIR)/, $(hw-obj-y))
+# for antivm
+antivm-obj-y = $(SRC_PATH)/antivm/api_hook.o
+obj-y += $(antivm-obj-y)
 
 endif # CONFIG_SOFTMMU
 
