@@ -10,16 +10,29 @@
 #include "exec-all.h"
 
 /* exactly match dst and target */
-static bool target_match(uint8_t *dst, const char* target);
+static bool target_image_match(uint8_t *dst, const char* target);
 
+/* use cr3 to identify process without considering cr3 re-use */
 static target_ulong gcr3 = 0;
+/* target process to be monitored */
+static const char target_arr[3][16] = {"pafish.vxe", "VMDetector.exe",\
+                                        "al-khaser.vxe",};
+static const char *target = target_arr[0];
 /*
  * filtered APIs virtual addr, fixed in winxp:
  * GlobalMemoryStatus: 0x7c8310e2
  * GlobalMemoryStatusEx: 0x7c81f97a
+ * sleep: 0x7c802446
+ * sleepEx: 0x7c8023a0
+ * NtDelayExecution: 0x7c92d1f0
+ * GetTickCount: 0x7c80932e
  */
 static target_ulong gms_addr = 0x7c8310e2;
-static uint32_t gmsx_addr = 0x7c81f97a;
+static target_ulong gmsx_addr = 0x7c81f97a;
+static target_ulong gsp_addr = 0x7c802446;
+static target_ulong gspx_addr = 0x7c8023a0;
+static target_ulong gde_addr = 0x7c92d1f0;
+//static target_ulong gtc_addr = 0x7c80932e;
 /*
  * ntdll!NtTerminateProcess va: 0x7c92de50
  * kernel32!ExitProcess va: 0x7c81cafa
@@ -27,7 +40,10 @@ static uint32_t gmsx_addr = 0x7c81f97a;
  * nt!ZwTerminateProcsss va: 0x805001ac
  */
 //static target_ulong tp_addr = 0x805c9c2a;
-static const char *target = "pafish.vxe";
+/* paras for sleep, sleepEx and NtDelayExecution */
+static uint32_t gsp_delay = 0;
+static uint32_t gspx_delay = 0;
+static uint32_t gde_delay = 0;
 
 static void get_target_cr3(CPUState *env){
     if (gcr3 == 0){
@@ -36,7 +52,7 @@ static void get_target_cr3(CPUState *env){
         target_ulong kd_offset = 0xffdff000 + 0x120 + 0x4;
         cpu_memory_rw_debug(env, kd_offset, kthread, 4, 0);
 
-        /* get kprocess */
+        /* get kprocess which created the thread */
         uint8_t kprocess[4];
         uint32_t ks_offset = *(uint32_t *)kthread + 0x220;
         cpu_memory_rw_debug(env, (target_ulong)ks_offset, kprocess, 4, 0);
@@ -47,7 +63,7 @@ static void get_target_cr3(CPUState *env){
         cpu_memory_rw_debug(env, (target_ulong)in_offset, image_name, 16, 0);
 
         /* filter target image name */
-        if (target_match(image_name, target)){
+        if (target_image_match(image_name, target)){
             /*
              * check if env->cr[3] eq kprocss->DirectoryTableBase
              * excluding process switching or remote thread
@@ -76,7 +92,7 @@ static void get_target_cr3(CPUState *env){
     }
 }
 
-static void monitor_api(CPUState *env){
+static void monitor_api_impl(CPUState *env){
     if  (gcr3 == env->cr[3] && gcr3 != 0){
         target_ulong eip = env->eip;
 
@@ -136,7 +152,7 @@ static void monitor_api(CPUState *env){
             uint32_t gmsx_lpbuf = *(uint32_t *)gmsx_buf;
             cpu_memory_rw_debug(env, (target_ulong)gmsx_lpbuf, \
                                 msx, sizeof(MemoryStatusEx), 0);
-            MemoryStatusEx *pmsx = (MemoryStatus *)msx;
+            MemoryStatusEx *pmsx = (MemoryStatusEx *)msx;
             fprintf(stderr, "original val for dwTotalPhys: %dMB\n", \
                     (DWORD)(pmsx->ullTotalPhys/(1024 * 1024)));
 
@@ -150,26 +166,79 @@ static void monitor_api(CPUState *env){
             /* reset params */
             memset(gmsx_ret_addr, 0, sizeof(gmsx_ret_addr));
             memset(gmsx_buf, 0, sizeof(gmsx_buf));
-        //}else if (eip == tp_addr){
-            /* process exit */
-        //    fprintf(stderr, "process exit\n");
-        //    gcr3 = 0;
+
+        /* hit sleep */
+        }else if (eip == gsp_addr){
+            /* get para and store */
+            uint8_t gsp_para[4];
+            uint32_t esp = (uint32_t)env->regs[R_ESP];
+            cpu_memory_rw_debug(env, (target_ulong)(esp + 4), gsp_para, 4, 0);
+            gsp_delay = *(uint32_t *)gsp_para;
+            fprintf(stderr, "call sleep at %x with para %x\n", \
+                    (uint32_t)eip, gsp_delay);
+
+        /* hit sleepEx */
+        }else if (eip == gspx_addr){
+            /* get para and store */
+            uint8_t gspx_para[4];
+            uint32_t esp = (uint32_t)env->regs[R_ESP];
+            cpu_memory_rw_debug(env, (target_ulong)(esp + 8), gspx_para, 4, 0);
+            gspx_delay = *(uint32_t *)gspx_para;
+            fprintf(stderr, "call sleepEx at %x with para %x\n", \
+                    (uint32_t)eip, gspx_delay);
+
+        /* hit NtDelayExecution */
+        }else if (eip == gde_addr){
+            /* get para and store */
+            uint8_t gde_para[4];
+            uint32_t esp = (uint32_t)env->regs[R_ESP];
+            cpu_memory_rw_debug(env, (target_ulong)(esp + 4), gde_para, 4, 0);
+            gde_delay = *(uint32_t *)gde_para;
+            fprintf(stderr, "call NtDelayExecution at %x with para %x\n", \
+                    (uint32_t)eip, gsp_delay);
         }
     }
 }
 
-void monitor_memory_api(CPUState *env, void *opaque){
+void monitor_api(CPUState *env, void *opaque){
     if (gcr3 == 0){
         get_target_cr3(env);
     }else{
-        monitor_api(env);
+        monitor_api_impl(env);
     }
 }
 
-static bool target_match(uint8_t dst[], const char* target){
+static bool target_image_match(uint8_t dst[], const char* target){
     /* dst is fixed length */
     for (int i = 0; i < 16 && dst[i] == (uint8_t)*target; i++, target++)
         if (dst[i] == '\0')
             return true;
     return false;
+}
+
+bool is_target_process(CPUState *env){
+    return (gcr3 && gcr3 == env->cr[3]) ? true : false;
+}
+
+void adjust_rdtsc_val(uint64_t cur_val, uint64_t *last_val){
+    /* reset current val with last val and a little delta */
+    uint64_t lval = *last_val;
+    static uint64_t base = 256;
+    static uint64_t radius = 64;
+    static int scaler = 4096;
+    if (lval == 0){
+        /* first hit */
+        *last_val = cur_val;
+        fprintf(stderr, "first hit, %lx --> %lx\n", cur_val, *last_val);
+    }else if (gsp_delay || gspx_delay || gde_delay){
+        /* call sleep(),sleepEx(), or NtDelayExecution() within two rdtsc */
+        *last_val = cur_val;
+        gsp_delay = gspx_delay = gde_delay = 0;
+    }else if (cur_val - lval > scaler * base){
+        /* jump to the same step of cur_val */
+        *last_val = cur_val;
+    }else{
+        /* plus little delta */
+        *last_val = lval + base + (rand() % radius);
+    }
 }

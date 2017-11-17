@@ -559,9 +559,9 @@ int cpu_exec(CPUState *env)
                 if (likely(!env->exit_request)) {
                     tc_ptr = tb->tc_ptr;
                 /* execute the generated code */
-                /* monitor API call here*/
+                /* monitor API call here */
 #if defined(TARGET_I386) || defined(TARGET_X86_64)
-                    monitor_memory_api(env, NULL);
+                    monitor_api(env, NULL);
 #endif
                     next_tb = tcg_qemu_tb_exec(env, tc_ptr);
                     if ((next_tb & 3) == 2) {
