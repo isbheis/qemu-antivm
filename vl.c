@@ -134,6 +134,7 @@ int main(int argc, char **argv)
 
 // for antivm
 #include "antivm/mouse-rmove.h"
+#include "antivm/key-rhit.h"
 
 #define MAX_VIRTIO_CONSOLES 1
 #define MAX_SCLP_CONSOLES 1
@@ -4793,6 +4794,8 @@ int main(int argc, char **argv, char **envp)
 
     /* install a timer sending mouse move events periodically*/
     mouse_move_random_timer();
+    /* install a timer sending key sequence hit events randomly */
+    hit_random_key_sequence_timer();
 
     main_loop();
     replay_disable_events();

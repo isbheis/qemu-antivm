@@ -1,2 +1,4 @@
 antivm-obj-y += mouse-rmove.o
+antivm-obj-y += key-rhit.o
 mouse-rmove.o-cflags := -O1
+key-rhit.o-cflags := -O1

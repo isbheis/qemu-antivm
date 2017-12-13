@@ -1,6 +1,6 @@
 /*
  * 2017-10-19
- * implement of mouse_move_random_thread function
+ * implement of mouse_move_random_timer function
  */
 
 #include "qemu/osdep.h"
