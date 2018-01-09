@@ -25,6 +25,9 @@
 #include "exec/cpu_ldst.h"
 #include "exec/address-spaces.h"
 
+// for antivm
+#include "antivm/api_hook.h"
+
 void helper_outb(CPUX86State *env, uint32_t port, uint32_t data)
 {
 #ifdef CONFIG_USER_ONLY
@@ -199,8 +202,25 @@ void helper_rdtsc(CPUX86State *env)
     cpu_svm_check_intercept_param(env, SVM_EXIT_RDTSC, 0, GETPC());
 
     val = cpu_get_tsc(env) + env->tsc_offset;
-    env->regs[R_EAX] = (uint32_t)(val);
-    env->regs[R_EDX] = (uint32_t)(val >> 32);
+
+    /* adjust current val with last_val */
+    static uint64_t last_val = 0;
+    static uint64_t val_tmp = 0;    /* debug */
+    static uint64_t last_tmp = 0;   /* debug */
+    if (is_target_process(env) && (uint32_t)env->eip < 0x80000000){
+        /* hit target process */
+        last_tmp = last_val;
+        adjust_rdtsc_val(val, &last_val);
+        fprintf(stderr, "hit rdtsc at %x, %lx --> %lx, delta:%lx --> %lx\n", \
+                (uint32_t)env->eip, val, last_val, val - val_tmp, \
+                last_val - last_tmp);
+        val_tmp = val;
+    }else{
+        last_val = val;
+    }
+
+    env->regs[R_EAX] = (uint32_t)(last_val);
+    env->regs[R_EDX] = (uint32_t)(last_val >> 32);
 }
 
 void helper_rdtscp(CPUX86State *env)

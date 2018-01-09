@@ -36,6 +36,10 @@
 #include "sysemu/cpus.h"
 #include "sysemu/replay.h"
 
+// for antivm
+#if defined(TARGET_I386) || defined(TARGET_X86_64)
+#include "antivm/api_hook.h"
+#endif
 /* -icount align implementation. */
 
 typedef struct SyncClocks {
@@ -163,6 +167,12 @@ static inline tcg_target_ulong cpu_tb_exec(CPUState *cpu, TranslationBlock *itb)
 #endif /* DEBUG_DISAS */
 
     cpu->can_do_io = !use_icount;
+
+    /* monitor api here */
+#if defined(TARGET_I386) || defined(TARGET_X86_64)
+    monitor_api(env, NULL);
+#endif
+
     ret = tcg_qemu_tb_exec(env, tb_ptr);
     cpu->can_do_io = 1;
     last_tb = (TranslationBlock *)(ret & ~TB_EXIT_MASK);
