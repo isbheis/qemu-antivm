@@ -32,7 +32,7 @@ static target_ulong gmsx_addr = 0x7c81f97a;
 static target_ulong gsp_addr = 0x7c802446;
 static target_ulong gspx_addr = 0x7c8023a0;
 static target_ulong gde_addr = 0x7c92d1f0;
-//static target_ulong gtc_addr = 0x7c80932e;
+static target_ulong gtc_addr = 0x7c80932e;
 /*
  * ntdll!NtTerminateProcess va: 0x7c92de50
  * kernel32!ExitProcess va: 0x7c81cafa
@@ -103,6 +103,7 @@ static void monitor_api_impl(CPUArchState *env){
         static uint8_t gmsx_ret_addr[4];
         static uint8_t gms_buf[4];
         static uint8_t gmsx_buf[4];
+        static uint8_t gtc_ret_addr[4];
 
         /* debug */
         //if ((uint32_t)eip >= 0x400000 && (uint32_t)eip <= 0x440000)
@@ -198,6 +199,26 @@ static void monitor_api_impl(CPUArchState *env){
             gde_delay = *(uint32_t *)gde_para;
             fprintf(stderr, "call NtDelayExecution at %x with para %x\n", \
                     (uint32_t)eip, gsp_delay);
+
+        /* hit GetTickCount */
+        }else if (eip == gtc_addr){
+            /* get return addr */
+            uint32_t esp = (uint32_t)env->regs[R_ESP];
+            cpu_memory_rw_debug(cpu, (target_ulong)esp, gtc_ret_addr, 4, 0);
+            fprintf(stderr, "hit GetTickCount at %x\n", (uint32_t)eip);
+
+        /* hit ret addr of GetTickCount */
+        //}else if ((uint32_t)eip == *(uint32_t *)gtc_ret_addr){
+        }else if (eip == gtc_addr + 0xe){   /* ret before GetTickCount */
+            /* reset to increase system up time */
+            static uint32_t system_uptime_base;
+            if (system_uptime_base == 0){
+                /* random value, about 32 + 16 minutes */
+                srand((unsigned)time(NULL));
+                system_uptime_base = 0x1d4c00 + (rand() << 5) + rand();
+            }
+            env->regs[R_EAX] += (target_ulong)system_uptime_base;
+            fprintf(stderr, "reset to %x\n", (uint32_t)env->regs[R_EAX]);
         }
     }
 }
