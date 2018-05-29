@@ -27,6 +27,7 @@
 
 // for antivm
 #include "antivm/api_hook.h"
+#include "antivm/pic_button.h"
 
 void helper_outb(CPUX86State *env, uint32_t port, uint32_t data)
 {
@@ -104,6 +105,19 @@ void helper_into(CPUX86State *env, int next_eip_addend)
 void helper_cpuid(CPUX86State *env)
 {
     uint32_t eax, ebx, ecx, edx;
+
+    // picture button found
+    if ((uint32_t)env->regs[R_ESI] == 0x8080){
+        // get location of button
+        int loc[4] = { 0 };
+        loc[0] = (int32_t)env->regs[R_EAX];
+        loc[1] = (int32_t)env->regs[R_EBX];
+        loc[2] = (int32_t)env->regs[R_ECX];
+        loc[3] = (int32_t)env->regs[R_EDX];
+        // do parse
+        parse_picture_button(loc);
+        return;
+    }
 
     cpu_svm_check_intercept_param(env, SVM_EXIT_CPUID, 0, GETPC());
 

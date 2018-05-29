@@ -39,6 +39,6 @@ void mouse_move_random_timer(void)
     /* create a timer on default timer list*/
     QEMUTimer *ts = timer_new_ms(QEMU_CLOCK_VIRTUAL, mouse_move_random, NULL);
     ts->opaque = ts; /* brutal */
-    int64_t init_delay = 10 * 1000; /* milliseconds */
+    int64_t init_delay = 24 * 1000; /* milliseconds */
     timer_mod(ts, qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + init_delay);
 }

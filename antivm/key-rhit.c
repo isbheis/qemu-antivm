@@ -76,9 +76,11 @@ static void hit_random_key_sequence(void *opaque){
 }
 
 void hit_random_key_sequence_timer(void){
+    // debug
+    //return;
     /* create a timer on default timer list*/
     QEMUTimer *ts = timer_new_ms(QEMU_CLOCK_VIRTUAL, hit_random_key_sequence, NULL);
     ts->opaque = ts; /* brutal */
-    int64_t init_delay = 20 * 1000; /* wait for system setup, in milliseconds */
+    int64_t init_delay = 32 * 1000; /* wait for system setup, in milliseconds */
     timer_mod(ts, qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + init_delay);
 }
